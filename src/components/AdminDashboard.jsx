@@ -3,14 +3,28 @@ import PersonIcon from "@mui/icons-material/Person";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CalendarHeader from "./CalendarHeader";
 import CalendarRow from "./CalendarRow";
-// import RoleFilter from "./RoleFilter";
 import { useState } from "react";
-
 import { getCalendarDays } from "../utils/dateUtils";
 import { employees } from "../data/sampleData";
+import DatePicker from "react-datepicker";
 
 const AdminDashboard = () => {
-  const dates = getCalendarDays("2025-01-02", "2025-02-02");
+  // calendar functioanlity
+  const [selectedDate, setSelectedDate] = useState(new Date()); //default to current date
+  const [showDatePicker, setShowDatePicker] = useState(new Date());
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setShowDatePicker(false);
+  };
+
+  const startDate = selectedDate;
+  const endDate = new Date(startDate);
+  endDate.setMonth(startDate.getMonth() + 1); //set to next month
+
+  const dates = getCalendarDays(startDate.toISOString(), endDate.toISOString());
+
+  // Filtering based on roles
   const [selectedRoles, setSelectedRoles] = useState("All");
 
   const roles = ["All", ...new Set(employees.map((e) => e.role))];
@@ -22,13 +36,6 @@ const AdminDashboard = () => {
           (e) =>
             e.role.trim().toLowerCase() === selectedRoles.trim().toLowerCase()
         );
-
-  // // role based filter functioanlity
-  // const handleRoleChange = () => {
-  //   setSelectedRoles((prev) =>
-  //     prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
-  //   );
-  // };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -43,8 +50,30 @@ const AdminDashboard = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-2 text-gray-600">
-              <CalendarMonthIcon className="h-5 w-5" />
-              <span>Jan - Feb 2025</span>
+              <CalendarMonthIcon
+                className="h-5 w-5 cursor-pointer"
+                onClick={() => {
+                  setShowDatePicker(!showDatePicker); //toggle calendar
+                }}
+              />
+              {showDatePicker && (
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={handleDateChange}
+                  dateFormat="MMMM YYYY"
+                  showMonthYearPicker
+                  inline
+                  className="relative border-2 border-gray-300 rounded-xl shadow-lg bg-white p-4 mt-4 w-96 transform transition-all hover:scale-105 hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  popperClassName="custom-datepicker-popper"
+                  calendarClassName="custom-datepicker-calendar"
+                />
+              )}
+              <span className="text-lg font-medium text-gray-900">
+                {selectedDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </div>
 
